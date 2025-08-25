@@ -8,4 +8,4 @@ spec:
   resources:
     requests:
       storage: 700Mi
-  storageClassName: gp3   
+  storageClassName: standard   # when creating the aws eks cluster change to gp2 or gp3
