@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: vote
-          image: mennaazazy/vote:latest
+          image: omarlashin217/vote:latest
           ports:
             - containerPort: 80
           livenessProbe:
@@ -35,3 +35,8 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 2
             failureThreshold: 3
+          env:
+            - name: REDIS_HOST
+              value: redis
+            - name: REDIS_PORT
+              value: "6379"
