@@ -35,6 +35,7 @@ jobs:
       - name: Terraform Apply
         run: terraform -chdir=./Terraform apply -auto-approve -var-file=./Terraform/terraform.tfvars
 
+
   docker:
     needs: terraform
     runs-on: ubuntu-latest
