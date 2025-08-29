@@ -29,11 +29,10 @@ jobs:
       - name: terraform destroy
         run: |
             terraform init -reconfigure
-            terraform destroy -auto-approve
         working-directory: ./Terraform
 
-      - name: Terraform Init
-        run: terraform -chdir=./Terraform init 
+      # - name: Terraform Init
+      #   run: terraform -chdir=./Terraform init 
 
       - name: Terraform Validate
         run: terraform -chdir=./Terraform validate
