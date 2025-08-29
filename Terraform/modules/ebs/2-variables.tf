@@ -9,7 +9,7 @@ variable "size" {
 
 variable "volume_type" {
   type    = string
-  default = "gp2"
+  default = "gp3"
 }
 
 variable "name" {
