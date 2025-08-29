@@ -32,6 +32,11 @@ jobs:
       - name: Terraform Validate
         run: terraform -chdir=./Terraform validate
 
+      - name: Terraform Import Existing IAM Roles
+        run: |
+          terraform -chdir=./Terraform import aws_iam_role.eks_cluster voting-app-eks-cluster-role || echo "eks_cluster role already imported"
+          terraform -chdir=./Terraform import aws_iam_role.eks_nodes voting-app-eks-node-role || echo "eks_nodes role already imported"
+
       - name: Terraform Plan
         run: terraform -chdir=./Terraform plan -var-file=terraform.tfvars
 
