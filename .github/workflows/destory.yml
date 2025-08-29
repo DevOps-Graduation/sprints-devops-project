@@ -1,9 +1,6 @@
 name: infrastructure destroy
 
 on:
-  push:
-    branches:
-      - ci-cd
   workflow_dispatch:
 
 jobs:
