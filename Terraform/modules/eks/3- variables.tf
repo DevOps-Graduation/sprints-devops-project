@@ -17,5 +17,5 @@ variable "node_desired_capacity" {
 variable "instance_type" {
   description = "The instance type for the EKS worker nodes"
   type        = string
-  default     = "t3.small"
+  default     = "t3.micro"
 }
