@@ -3,7 +3,7 @@ name: Provisioning Infra - Build and Push Docker Images
 on:
   push:
     branches:
-      - main
+      - ci-cd
   workflow_dispatch:
 
 jobs:
@@ -43,8 +43,27 @@ jobs:
       - name: Terraform Apply
         run: terraform -chdir=./Terraform apply -auto-approve -var-file=terraform.tfvars
 
+  unit_testing: 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./result
+
+      - name: Run unit tests
+        run: npm test
+        working-directory: ./result
+
   docker:
-    needs: terraform
+    needs: [unit_testing, terraform]
     runs-on: ubuntu-latest
     environment: dev
     strategy:
