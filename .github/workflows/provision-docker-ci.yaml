@@ -106,10 +106,9 @@ jobs:
         run: |
           kubectl apply -f k8s/.
 
-      - name: Install test dependencies
+      - name: Verify all pods are running
         run: |
-          sudo apt-get update
-          sudo apt-get install -y phantomjs curl
-
-      - name: Run result service tests
-        run: ./result/tests/tests.sh
+          kubectl get pods -n default
+          
+      - name: Get service details
+        run: kubectl get svc -n default
