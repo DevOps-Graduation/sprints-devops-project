@@ -1,0 +1,58 @@
+name: Provisioning Infra - Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - main   
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.6.0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+
+      - name: Terraform Init
+        run: terraform init ./Terraform
+
+      - name: Terraform Plan
+        run: terraform plan -var-file=./Terraform/terraform.tfVars ./Terraform
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -var-file=./Terraform/terraform.tfVars ./Terraform
+
+  docker:
+    needs: terraform
+    runs-on: ubuntu-latest
+    environment: dev
+    strategy:
+      matrix:
+        service: [vote, result, worker]  
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+  
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+  
+      - name: Build and Push ${{ matrix.service }}
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest ./${{ matrix.service }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
