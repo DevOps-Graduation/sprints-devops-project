@@ -17,7 +17,7 @@ module "eks" {
 
 module "ebs" {
   source            = "./modules/ebs"
-  availability_zone = "us-west-1a"
+  availability_zone = "us-west-2a"
   size              = 1
   volume_type       = "gp3"
   name              = "db-volume"
