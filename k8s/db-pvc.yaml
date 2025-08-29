@@ -8,4 +8,4 @@ spec:
   resources:
     requests:
       storage: 700Mi
-  storageClassName: gp3  
+  storageClassName: gp2
