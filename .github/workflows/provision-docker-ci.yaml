@@ -109,14 +109,18 @@ jobs:
       - name: Verify all pods are running
         run: |
           kubectl get pods
-
+          
       - name: Wait for deployments to roll out
         run: |
+          kubectl rollout status deployment/postgres --timeout=180s
           kubectl rollout status deployment/vote --timeout=180s
-          kubectl rollout status deployment/result --timeout=180s
           kubectl rollout status deployment/worker --timeout=180s
           kubectl rollout status deployment/redis --timeout=180s
-          kubectl rollout status deployment/postgres --timeout=180s
+          kubectl rollout status deployment/result --timeout=180s
+
+      - name: Verify all pods are running
+        run: |
+          kubectl get pods
 
       - name: Get service details
         run: kubectl get svc -n default
