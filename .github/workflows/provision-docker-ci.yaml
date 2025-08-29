@@ -27,7 +27,10 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Terraform Init
-        run: terraform -chdir=./Terraform init
+        run: terraform -chdir=./Terraform init -upgrade
+
+      - name: Terraform Validate
+        run: terraform -chdir=./Terraform validate
 
       - name: Terraform Plan
         run: terraform -chdir=./Terraform plan -var-file=terraform.tfvars
