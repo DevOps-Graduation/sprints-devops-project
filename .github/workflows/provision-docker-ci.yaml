@@ -3,7 +3,7 @@ name: Provisioning Infra - Build and Push Docker Images
 on:
   push:
     branches:
-      - main   
+      - ci-cd   
 
 jobs:
   terraform:
