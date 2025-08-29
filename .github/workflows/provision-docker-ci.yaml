@@ -27,13 +27,13 @@ jobs:
       
 
       - name: Terraform Init
-        run: terraform init ./Terraform
+        run: terraform -chdir=./Terraform init
 
       - name: Terraform Plan
-        run: terraform plan -var-file=./Terraform/terraform.tfVars ./Terraform
+        run: terraform -chdir=./Terraform plan -var-file=terraform.tfVars
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -var-file=./Terraform/terraform.tfVars ./Terraform
+        run: terraform -chdir=./Terraform apply -auto-approve -var-file=terraform.tfVars
 
   docker:
     needs: terraform
