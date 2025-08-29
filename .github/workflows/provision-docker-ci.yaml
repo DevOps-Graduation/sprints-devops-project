@@ -49,6 +49,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install dependencies (phantomjs, curl, bash)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y phantomjs curl
+          
       - name: Give execute permission for test script
         run: chmod +x ./result/tests/tests.sh
 
