@@ -3,7 +3,7 @@ name: Provisioning Infra - Build and Push Docker Images
 on:
   push:
     branches:
-      - ci-cd
+      - main
   workflow_dispatch:
 
 jobs:
@@ -26,8 +26,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Terraform Init
-        run: terraform -chdir=./Terraform init
+      - name: terraform destroy
+        run: |
+            terraform init -reconfigure
+        working-directory: ./Terraform
+
+      # - name: Terraform Init
+      #   run: terraform -chdir=./Terraform init 
+
+      - name: Terraform Validate
+        run: terraform -chdir=./Terraform validate
 
       - name: Terraform Plan
         run: terraform -chdir=./Terraform plan -var-file=terraform.tfvars
