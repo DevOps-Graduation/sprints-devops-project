@@ -13,3 +13,9 @@ variable "node_desired_capacity" {
   type        = number
   default     = 2
 }
+
+variable "instance_type" {
+  description = "The instance type for the EKS worker nodes"
+  type        = string
+  default     = "t3.medium"
+}
