@@ -106,9 +106,12 @@ jobs:
         run: |
           kubectl apply -f k8s/.
 
-      - name: Verify all pods are running
+      - name: Verify Deployments rolled out
         run: |
-          kubectl get pods -n default
-          
+          kubectl rollout status deployment/vote --timeout=120s
+          kubectl rollout status deployment/result --timeout=120s
+          kubectl rollout status deployment/worker --timeout=120s
+
       - name: Get service details
         run: kubectl get svc -n default
+
