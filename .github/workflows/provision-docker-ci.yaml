@@ -43,27 +43,27 @@ jobs:
   #     - name: Terraform Apply
   #       run: terraform -chdir=./Terraform apply -auto-approve -var-file=terraform.tfvars
 
-  unit_testing: 
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  # unit_testing: 
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Install dependencies (phantomjs, curl, bash)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y phantomjs curl
+  #     - name: Install dependencies (phantomjs, curl, bash)
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install -y phantomjs curl
           
-      - name: Give execute permission for test script
-        run: chmod +x ./result/tests/tests.sh
+  #     - name: Give execute permission for test script
+  #       run: chmod +x ./result/tests/tests.sh
 
-      - name: Run result service tests
-        run: ./tests.sh
-        working-directory: ./result/tests
+  #     - name: Run result service tests
+  #       run: ./tests.sh
+  #       working-directory: ./result/tests
 
 
   docker:
-    needs: [unit_testing]
+    # needs: [unit_testing]
     runs-on: ubuntu-latest
     environment: dev
     strategy:
@@ -83,3 +83,33 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest ./${{ matrix.service }}
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [docker]
+    environment: dev
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name voting-app-0123 --region ${{ secrets.AWS_REGION }}
+
+      - name: Deploy Kubernetes Manifests
+        run: |
+          kubectl apply -f k8s/.
+
+      - name: Install test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y phantomjs curl
+
+      - name: Run result service tests
+        run: ./result/tests/tests.sh
