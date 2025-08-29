@@ -7,41 +7,41 @@ on:
   workflow_dispatch:
 
 jobs:
-  terraform:
-    runs-on: ubuntu-latest
-    environment: dev
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  # terraform:
+  #   runs-on: ubuntu-latest
+  #   environment: dev
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.6.0
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v2
+  #       with:
+  #         terraform_version: 1.6.0
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: terraform destroy
-        run: |
-            terraform init -reconfigure
-        working-directory: ./Terraform
+  #     - name: terraform destroy
+  #       run: |
+  #           terraform init -reconfigure
+  #       working-directory: ./Terraform
 
-      # - name: Terraform Init
-      #   run: terraform -chdir=./Terraform init 
+  #     # - name: Terraform Init
+  #     #   run: terraform -chdir=./Terraform init 
 
-      - name: Terraform Validate
-        run: terraform -chdir=./Terraform validate
+  #     - name: Terraform Validate
+  #       run: terraform -chdir=./Terraform validate
 
-      - name: Terraform Plan
-        run: terraform -chdir=./Terraform plan -var-file=terraform.tfvars
+  #     - name: Terraform Plan
+  #       run: terraform -chdir=./Terraform plan -var-file=terraform.tfvars
 
-      - name: Terraform Apply
-        run: terraform -chdir=./Terraform apply -auto-approve -var-file=terraform.tfvars
+  #     - name: Terraform Apply
+  #       run: terraform -chdir=./Terraform apply -auto-approve -var-file=terraform.tfvars
 
   # unit_testing: 
   #   runs-on: ubuntu-latest
@@ -63,7 +63,7 @@ jobs:
 
 
   docker:
-    needs: [terraform]
+    # needs: [terraform]
     runs-on: ubuntu-latest
     environment: dev
     strategy:
@@ -106,6 +106,10 @@ jobs:
         run: |
           kubectl apply -f k8s/.
 
+      - name: Verify all pods are running
+        run: |
+          kubectl get pods
+
       - name: Wait for deployments to roll out
         run: |
           kubectl rollout status deployment/vote --timeout=180s
@@ -113,10 +117,6 @@ jobs:
           kubectl rollout status deployment/worker --timeout=180s
           kubectl rollout status deployment/redis --timeout=180s
           kubectl rollout status deployment/postgres --timeout=180s
-
-      - name: Verify all pods are running
-        run: |
-          kubectl get pods
 
       - name: Get service details
         run: kubectl get svc -n default
