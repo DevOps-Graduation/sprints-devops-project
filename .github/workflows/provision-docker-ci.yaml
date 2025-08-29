@@ -49,18 +49,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
+      - name: Give execute permission for test script
+        run: chmod +x ./result/tests/tests.sh
 
-      - name: Install dependencies
-        run: npm install
-        working-directory: ./result
-
-      - name: Run unit tests
-        run: npm test
+      - name: Run result service tests
+        run: ./tests.sh
         working-directory: ./result/tests
+
 
   docker:
     needs: [unit_testing]
