@@ -23,3 +23,8 @@ module "ebs" {
   volume_type       = "gp3"
   name              = "db-volume"
 }
+
+
+module "monitoring" {
+  source = "./modules/monitoring"
+}
