@@ -1,5 +1,5 @@
 data "aws_eks_cluster" "this" {
-  name = "voting-app-0123"
+  name = "voting-app-453"
 }
 
 data "aws_eks_cluster_auth" "this" {
@@ -13,7 +13,6 @@ provider "helm" {
     token                  = data.aws_eks_cluster_auth.this.token
   }
 }
-
 
 resource "helm_release" "prometheus" {
   name       = "prometheus"
