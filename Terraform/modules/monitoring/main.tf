@@ -1,5 +1,5 @@
 # data "aws_eks_cluster" "this" {
-#   name = "voting-app-2020"
+#   name = "voting-app-3030"
 # }
 
 # data "aws_eks_cluster_auth" "this" {
