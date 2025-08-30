@@ -1,10 +1,16 @@
 name: Build and Push Docker Images
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
+  # workflow_dispatch:
   workflow_dispatch:
+    inputs:
+      destroy:
+        description: "Destroy infrastructure? (yes/no)"
+        required: true
+        default: "no"
 
 jobs:
   terraform:
@@ -43,8 +49,13 @@ jobs:
         run: terraform plan
         working-directory: ./Terraform
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
+      - name: terraform apply or destroy
+        run: |
+          if [ "${{ github.event.inputs.destroy }}" = "yes" ]; then
+          terraform destroy -auto-approve
+          else
+          terraform apply -auto-approve
+          fi
         working-directory: ./Terraform
 
   # unit_testing:
