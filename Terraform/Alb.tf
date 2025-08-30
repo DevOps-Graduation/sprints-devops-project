@@ -21,7 +21,7 @@ resource "aws_iam_role" "aws_load_balancer_controller" {
     Statement = [{
       Effect = "Allow",
       Principal = {
-        Federated = aws_iam_openid_connect_provider.eks.arn
+        Federated = module.eks.oidc_provider_url
       },
       Action = "sts:AssumeRoleWithWebIdentity",
       Condition = {
