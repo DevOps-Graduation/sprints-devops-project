@@ -4,4 +4,4 @@ metadata:
   name: ebs-csi-controller-sa
   namespace: kube-system
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::<Your_AWS_ACCOUNT_ID>:role/AmazonEKS_EBS_CSI_DriverRole
+    eks.amazonaws.com/role-arn: arn:aws:iam::580102500712:role/AmazonEKS_EBS_CSI_DriverRole
