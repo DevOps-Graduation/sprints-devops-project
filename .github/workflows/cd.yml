@@ -1,12 +1,15 @@
 name: Deploy to EKS
 
 on:
+#   workflow_run:
+#     workflows: ["Provision Infrastructure", "Build and Push Docker Images"] 
+#     types:
+#       - completed
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # needs: [docker]
     environment: dev
     steps:
       - name: Checkout code
