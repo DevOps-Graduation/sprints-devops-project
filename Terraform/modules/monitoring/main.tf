@@ -1,3 +1,12 @@
+data "aws_eks_cluster" "this" {
+  name = "voting-app-sarah"
+}
+
+data "aws_eks_cluster_auth" "this" {
+  name = data.aws_eks_cluster.this.name
+}
+
+
 provider "helm" {
   kubernetes = {
     host                   = data.aws_eks_cluster.cluster.endpoint
