@@ -1,4 +1,4 @@
-region                = "us-west-2"
+region                = "eu-central-1"
 vpc_cidr              = "10.0.0.0/16"
 cluster_name          = "voting-app-0123"
 node_desired_capacity = 2
