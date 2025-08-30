@@ -15,6 +15,7 @@ module "eks" {
   node_desired_capacity = var.node_desired_capacity
 }
 
+
 module "ebs" {
   source            = "./modules/ebs"
   availability_zone = "us-west-2a"
