@@ -103,7 +103,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Update kubeconfig
-        run: aws eks update-kubeconfig --name voting-app-1010 --region ${{ secrets.AWS_REGION }}
+        run: aws eks update-kubeconfig --name voting-app-2020 --region ${{ secrets.AWS_REGION }}
 
       - name: Deploy Kubernetes Manifests
         run: |
