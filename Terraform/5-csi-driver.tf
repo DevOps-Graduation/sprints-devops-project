@@ -1,17 +1,17 @@
-# Fetch cluster details (if not already available in your module)
-data "aws_eks_cluster" "this" {
-  name = var.cluster_name
+locals {
+  cluster_name = aws_eks_cluster.this.name
+  cluster_oidc = aws_eks_cluster.this.identity[0].oidc[0].issuer
 }
 
 # OIDC provider for IRSA
 resource "aws_iam_openid_connect_provider" "eks" {
-  url            = data.aws_eks_cluster.this.identity[0].oidc[0].issuer
+  url            = local.cluster_oidc
   client_id_list = ["sts.amazonaws.com"]
 }
 
 # IAM Role for EBS CSI Driver (using IRSA)
 resource "aws_iam_role" "ebs_csi_driver" {
-  name = "${var.cluster_name}-ebs-csi-driver-role"
+  name = "${local.cluster_name}-ebs-csi-driver-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -24,7 +24,7 @@ resource "aws_iam_role" "ebs_csi_driver" {
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringEquals = {
-            "${replace(data.aws_eks_cluster.this.identity[0].oidc[0].issuer, "https://", "")}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
+            "${replace(local.cluster_oidc, "https://", "")}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
           }
         }
       }
@@ -40,8 +40,12 @@ resource "aws_iam_role_policy_attachment" "ebs_csi_driver_attach" {
 
 # Install the EBS CSI driver as an addon
 resource "aws_eks_addon" "ebs_csi_driver" {
-  cluster_name             = data.aws_eks_cluster.this.name
+  cluster_name             = local.cluster_name
   addon_name               = "aws-ebs-csi-driver"
   addon_version            = "v1.29.1-eksbuild.1"
   service_account_role_arn = aws_iam_role.ebs_csi_driver.arn
+
+  depends_on = [
+    aws_iam_role_policy_attachment.ebs_csi_driver_attach
+  ]
 }
