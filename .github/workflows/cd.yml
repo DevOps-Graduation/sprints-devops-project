@@ -5,8 +5,7 @@ on:
     workflows: ["Provision Infrastructure", "Build and Push Docker Images"] 
     types:
       - completed
-    branches:
-      - ci-cd   
+    branches: [ci-cd]
   workflow_dispatch:
 
 jobs:
