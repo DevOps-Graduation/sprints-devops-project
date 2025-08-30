@@ -26,8 +26,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Terraform Init
-        run: terraform init
+      # - name: Terraform Init
+      #   run: terraform init
+      #   working-directory: ./Terraform
+
+      - name: terraform destroy
+        run: |
+          terraform init -reconfigure
         working-directory: ./Terraform
 
       - name: Terraform Validate
