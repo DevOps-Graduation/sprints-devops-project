@@ -1,9 +1,8 @@
 resource "helm_release" "aws_load_balancer_controller" {
   name       = "aws-load-balancer-controller"
   namespace  = "kube-system"
-  repository = "https://github.com/kubernetes-sigs/aws-load-balancer-controller.git"
+  repository = "https://aws.github.io/eks-charts"
   chart      = "aws-load-balancer-controller"
-  version    = "2.13.4"
   values = [
     templatefile("${path.root}/../k8s/alb-values.yaml", {
       vpc_id       = module.vpc.vpc_id
