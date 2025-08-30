@@ -31,5 +31,5 @@ module "monitoring" {
   cluster_endpoint              = module.eks.cluster_endpoint
   cluster_certificate_authority = module.eks.cluster_certificate_authority
   cluster_token                 = module.eks.cluster_token
-  depends_on                    = [module.eks]
+
 }
