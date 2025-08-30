@@ -1,10 +1,10 @@
 name: Deploy to EKS
 
 on:
-#   workflow_run:
-#     workflows: ["Provision Infrastructure", "Build and Push Docker Images"] 
-#     types:
-#       - completed
+  workflow_run:
+    workflows: ["Provision Infrastructure", "Build and Push Docker Images"] 
+    types:
+      - completed
   workflow_dispatch:
 
 jobs:
