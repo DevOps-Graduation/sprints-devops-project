@@ -38,7 +38,7 @@ jobs:
         run: terraform -chdir=./Terraform validate
       
       - name: Terraform Import CSI Driver
-        run: terraform import module.eks.aws_eks_addon.ebs_csi_driver voting-app-0123:aws-ebs-csi-driver
+        run: terraform -chdir=./Terraform/modules/eks/5-csi-driver.tf import module.eks.aws_eks_addon.ebs_csi_driver voting-app-0123:aws-ebs-csi-driver
 
 
       - name: Terraform Plan
