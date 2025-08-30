@@ -1,5 +1,5 @@
 data "aws_eks_cluster" "this" {
-  name = "voting-app-sarah"
+  name = "voting-app-0123"
 }
 
 data "aws_eks_cluster_auth" "this" {
