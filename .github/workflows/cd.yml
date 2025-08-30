@@ -2,15 +2,15 @@ name: Deploy to EKS
 
 on:
   workflow_run:
-    workflows: ["Provision Infrastructure", "Build and Push Docker Images"] 
+    workflows: ["Build and Push Docker Images"]
     types:
       - completed
-    # branches: [ci-cd]
+    branches: [ci-cd]
   workflow_dispatch:
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'ci-cd' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     environment: dev
     steps:
