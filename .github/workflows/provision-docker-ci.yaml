@@ -26,26 +26,21 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: terraform destroy
-        run: |
-            terraform init -reconfigure
+      - name: Terraform Init
+        run: terraform init
         working-directory: ./Terraform
 
-      # - name: Terraform Init
-      #   run: terraform -chdir=./Terraform init 
-
       - name: Terraform Validate
-        run: terraform -chdir=./Terraform validate
-      
-#      - name: Terraform Import CSI Driver
-#        run: terraform -chdir=./Terraform import module.eks.aws_eks_addon.ebs_csi_driver voting-app-0123:aws-ebs-csi-driver
-
+        run: terraform validate
+        working-directory: ./Terraform
 
       - name: Terraform Plan
-        run: terraform -chdir=./Terraform plan -var-file=terraform.tfvars
+        run: terraform plan 
+        working-directory: ./Terraform
 
       - name: Terraform Apply
-        run: terraform -chdir=./Terraform apply -auto-approve -var-file=terraform.tfvars
+        run: terraform apply -auto-approve 
+        working-directory: ./Terraform
 
   # unit_testing: 
   #   runs-on: ubuntu-latest
@@ -109,25 +104,6 @@ jobs:
       - name: Deploy Kubernetes Manifests
         run: |
           kubectl apply -f k8s/.
-
-      - name: Verify all pods are running
-        run: |
-          kubectl get pods
-          
-      # - name: Describe Pods
-      #   run: |
-      #     kubectl describe pod redis-596c7668df-gq5dt
-      #     kubectl describe pod result-6498f7d64c-zw6fh
-      #     kubectl describe pod vote-5f7fd588d-447t8
-      #     kubectl describe pod worker-546fc8cc65-g48dz
-          
-      - name: Wait for deployments to roll out
-        run: |
-          kubectl rollout status deployment/vote --timeout=1800s
-          kubectl rollout status deployment/worker --timeout=1800s
-          kubectl rollout status deployment/redis --timeout=180s
-          kubectl rollout status deployment/result --timeout=180s
-          kubectl rollout status deployment/postgres --timeout=180s
 
       - name: Verify all pods are running
         run: |
