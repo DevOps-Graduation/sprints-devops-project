@@ -23,7 +23,7 @@ resource "helm_release" "prometheus" {
 
   create_namespace = true
 
-  values = [
-    file("${path.module}/values.yaml")
-  ]
+  # values = [
+  #   file("${path.module}/values.yaml")
+  # ]
 }
