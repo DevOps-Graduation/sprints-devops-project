@@ -22,5 +22,5 @@ output "oidc_provider_url" {
 }
 
 output "cluster_token" {
-  value = aws_eks_cluster_auth.this.token
+  value = aws_eks_cluster.this.token
 }
