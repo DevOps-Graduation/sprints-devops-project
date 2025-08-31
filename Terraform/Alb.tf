@@ -44,7 +44,7 @@ resource "aws_iam_role" "aws_load_balancer_controller" {
     Statement = [{
       Effect = "Allow",
       Principal = {
-        Federated = module.eks.oidc_provider_url
+        Federated = module.eks.oidc_provider_arn
       },
       Action = "sts:AssumeRoleWithWebIdentity",
       Condition = {
@@ -56,7 +56,9 @@ resource "aws_iam_role" "aws_load_balancer_controller" {
   })
 }
 
+
 resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller_attach" {
-  policy_arn = "arn:aws:iam::aws:policy/AWSLoadBalancerControllerIAMPolicy"
+  policy_arn = "arn:aws:iam::580102500712:policy/AWSLoadBalancerControllerIAMPolicy"
   role       = aws_iam_role.aws_load_balancer_controller.name
 }
+
