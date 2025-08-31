@@ -8,16 +8,6 @@ provider "kubernetes" {
   }
 }
 
-resource "null_resource" "wait_for_nodes" {
-  depends_on = [aws_eks_node_group.this]
-
-  provisioner "local-exec" {
-    command = <<EOT
-      echo "Waiting for EKS nodes to be Ready..."
-      kubectl wait --for=condition=Ready nodes --all --timeout=15m
-    EOT
-  }
-}
 
 provider "helm" {
   alias = "alb"
