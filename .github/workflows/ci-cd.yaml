@@ -36,6 +36,10 @@ jobs:
         run: terraform validate
         working-directory: ./Terraform
 
+      - name: Terraform Plan
+        run: terraform plan
+        working-directory: ./Terraform
+
       - name: Terraform Apply/Destroy
         run: |
           if [ "${{ github.event.inputs.destroy }}" = "yes" ]; then
@@ -46,10 +50,14 @@ jobs:
           fi
         working-directory: ./Terraform
 
-  wait-for-cluster:
-    needs: terraform
+      - name: Export kubeconfig
+        if: github.event.inputs.destroy == 'no'
+        run: aws eks update-kubeconfig --name voting-app-3030 --region ${{ secrets.AWS_REGION }}
+
+  helm:
+    needs: [terraform]
     runs-on: ubuntu-latest
-    if: github.event.inputs.destroy == 'no'
+    environment: dev
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -61,14 +69,25 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Wait for EKS cluster kubeconfig
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name voting-app-3030 --region ${{ secrets.AWS_REGION }}
+
+      - name: Deploy EBS CSI Driver with Helm
         run: |
-          for i in {1..10}; do
-            aws eks update-kubeconfig --name voting-app --region ${{ secrets.AWS_REGION }} && break || sleep 30
-          done
+          helm repo add eks https://aws.github.io/eks-charts
+          helm repo update
+          helm upgrade --install aws-ebs-csi-driver eks/aws-ebs-csi-driver \
+            --namespace kube-system \
+            --set image.repository=602401143452.dkr.ecr.us-west-2.amazonaws.com/eks/aws-ebs-csi-driver
+          
+          # Wait until all pods are ready
+          kubectl wait --namespace kube-system \
+            --for=condition=Ready pods \
+            --selector app.kubernetes.io/name=aws-ebs-csi-driver \
+            --timeout=600s
 
   docker:
-    needs: [wait-for-cluster]
+    needs: [helm]
     runs-on: ubuntu-latest
     environment: dev
     strategy:
@@ -92,8 +111,8 @@ jobs:
           docker push $IMAGE:$TAG
 
   deploy:
-    needs: [docker]
     runs-on: ubuntu-latest
+    needs: [docker]
     environment: dev
     steps:
       - name: Checkout code
@@ -107,17 +126,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Update kubeconfig
-        run: aws eks update-kubeconfig --name voting-app --region ${{ secrets.AWS_REGION }}
-
-      - name: Deploy AWS Load Balancer Controller
-        run: |
-          helm repo add eks https://aws.github.io/eks-charts
-          helm repo update
-          helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \
-            -n kube-system \
-            --set clusterName=voting-app \
-            --set serviceAccount.create=true \
-            --set region=${{ secrets.AWS_REGION }}
+        run: aws eks update-kubeconfig --name voting-app-3030 --region ${{ secrets.AWS_REGION }}
 
       - name: Deploy Kubernetes Manifests
         run: kubectl apply -f k8s/.
