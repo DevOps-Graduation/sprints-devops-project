@@ -11,10 +11,7 @@ module "vpc" {
 module "eks" {
   source                = "./modules/eks"
   cluster_name          = var.cluster_name
-  subnet_ids = concat(
-    aws_subnet.public_subnets[*].id,
-    aws_subnet.private_subnets[*].id
-  )
+  subnet_ids            = module.vpc.private_subnets_ids
   node_desired_capacity = var.node_desired_capacity
   region                = var.region
 }
