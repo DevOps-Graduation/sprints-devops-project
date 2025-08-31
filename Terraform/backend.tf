@@ -1,8 +1,8 @@
 terraform {
   backend "s3" {
-    bucket         = "voting-bucket-580102500712"
+    bucket         = "voting-bucket-sarah-0123"
     key            = "stage/eks/terraform.tfstate"
-    region         = "us-west-2"
+    region         = "eu-central-1"
     dynamodb_table = "terraform-locks"
     encrypt        = true
   }

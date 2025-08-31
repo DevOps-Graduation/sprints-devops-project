@@ -19,7 +19,7 @@ module "eks" {
 
 module "ebs" {
   source            = "./modules/ebs"
-  availability_zone = "us-west-2a"
+  availability_zone = "eu-central-1a"
   size              = 1
   volume_type       = "gp3"
   name              = "db-volume"
@@ -27,9 +27,10 @@ module "ebs" {
 
 
 module "monitoring" {
-  source                        = "./modules/monitoring"
-  cluster_endpoint              = module.eks.cluster_endpoint
-  cluster_certificate_authority = module.eks.cluster_certificate_authority
+  source = "./modules/monitoring"
+  # cluster_endpoint              = module.eks.cluster_endpoint
+  # cluster_certificate_authority = module.eks.cluster_certificate_authority
+  cluster_name = module.eks.cluster_name
 
 
 }

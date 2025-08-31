@@ -1,10 +1,10 @@
-variable "cluster_endpoint" {
-  type = string
-}
-
-variable "cluster_certificate_authority" {
-  type = string
-}
-# variable "cluster_token" {
+# variable "cluster_endpoint" {
 #   type = string
 # }
+
+# variable "cluster_certificate_authority" {
+#   type = string
+# }
+variable "cluster_name" {
+  type = string
+}

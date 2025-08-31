@@ -1,25 +1,25 @@
-provider "kubernetes" {
-  host                   = module.eks.cluster_endpoint
-  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority)
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    command     = "aws"
-    args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
-  }
-}
+# provider "kubernetes" {
+#   host                   = module.eks.cluster_endpoint
+#   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority)
+#   exec {
+#     api_version = "client.authentication.k8s.io/v1beta1"
+#     command     = "aws"
+#     args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
+#   }
+# }
 
-provider "helm" {
-  alias = "alb"
-  kubernetes = {
-    host                   = module.eks.cluster_endpoint
-    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority)
-    exec = {
-      api_version = "client.authentication.k8s.io/v1beta1"
-      command     = "aws"
-      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
-    }
-  }
-}
+# provider "helm" {
+#   alias = "alb"
+#   kubernetes = {
+#     host                   = module.eks.cluster_endpoint
+#     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority)
+#     exec = {
+#       api_version = "client.authentication.k8s.io/v1beta1"
+#       command     = "aws"
+#       args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
+#     }
+#   }
+# }
 
 
 resource "helm_release" "aws_load_balancer_controller" {
@@ -37,7 +37,7 @@ resource "helm_release" "aws_load_balancer_controller" {
 
 }
 resource "aws_iam_role" "aws_load_balancer_controller" {
-  name = "aws-load-balancer-controller"
+  name = "${var.cluster_name}-aws-load-balancer-controller"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
