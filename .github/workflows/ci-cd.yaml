@@ -77,7 +77,7 @@ jobs:
   #       working-directory: ./result/tests
 
   docker:
-    # needs: [terraform]
+    needs: [terraform]
     runs-on: ubuntu-latest
     environment: dev
     strategy:
