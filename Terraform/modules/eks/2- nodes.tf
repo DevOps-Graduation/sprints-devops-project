@@ -14,7 +14,7 @@ resource "aws_eks_node_group" "this" {
 }
 
 resource "null_resource" "wait_for_nodes" {
-  depends_on = [module.eks]
+  
 
   provisioner "local-exec" {
     command = <<EOT

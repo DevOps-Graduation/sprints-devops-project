@@ -19,17 +19,35 @@ module "eks" {
 
 module "ebs" {
   source            = "./modules/ebs"
-  availability_zone = "us-west-2a"
+  availability_zone = "eu-central-1a"
   size              = 1
   volume_type       = "gp3"
   name              = "db-volume"
 }
 
+data "aws_eks_cluster_auth" "this" {
+  name = module.eks.cluster_name
+}
 
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority)
+  token                  = data.aws_eks_cluster_auth.this.token
+}
+
+provider "helm" {
+  kubernetes = {
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority)
+    token                  = data.aws_eks_cluster_auth.this.token
+  }
+}
 module "monitoring" {
-  source                        = "./modules/monitoring"
-  cluster_endpoint              = module.eks.cluster_endpoint
-  cluster_certificate_authority = module.eks.cluster_certificate_authority
+  source = "./modules/monitoring"
+  # cluster_endpoint              = module.eks.cluster_endpoint
+  # cluster_certificate_authority = module.eks.cluster_certificate_authority
+  cluster_name = module.eks.cluster_name
+  depends_on   = [module.eks]
 
 
 }

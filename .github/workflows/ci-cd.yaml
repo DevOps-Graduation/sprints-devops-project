@@ -1,6 +1,10 @@
-name: Build, Deploy, and Manage EKS Infra
+name: Build and Push Docker Images
 
 on:
+  # push:
+  #   branches:
+  #     - main
+  # workflow_dispatch:
   workflow_dispatch:
     inputs:
       destroy:
@@ -24,12 +28,17 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.SARAH_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.SARAH_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.SARAH_AWS_REGION }}
 
       - name: Terraform Init
         run: terraform init
+        working-directory: ./Terraform
+
+      - name: terraform destroy
+        run: |
+          terraform init -reconfigure
         working-directory: ./Terraform
 
       - name: Terraform Validate
@@ -40,54 +49,35 @@ jobs:
         run: terraform plan
         working-directory: ./Terraform
 
-      - name: Terraform Apply/Destroy
+      - name: terraform apply or destroy
         run: |
           if [ "${{ github.event.inputs.destroy }}" = "yes" ]; then
-            terraform init -reconfigure
-            terraform destroy -auto-approve
+          terraform destroy -auto-approve
           else
-            terraform apply -auto-approve
+          terraform apply -auto-approve
           fi
         working-directory: ./Terraform
 
-      - name: Export kubeconfig
-        if: github.event.inputs.destroy == 'no'
-        run: aws eks update-kubeconfig --name voting-app-3030 --region ${{ secrets.AWS_REGION }}
+  # unit_testing:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-  helm:
-    needs: [terraform]
-    runs-on: ubuntu-latest
-    environment: dev
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  #     - name: Install dependencies (phantomjs, curl, bash)
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install -y phantomjs curl
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+  #     - name: Give execute permission for test script
+  #       run: chmod +x ./result/tests/tests.sh
 
-      - name: Update kubeconfig
-        run: aws eks update-kubeconfig --name voting-app-3030 --region ${{ secrets.AWS_REGION }}
-
-      - name: Deploy EBS CSI Driver with Helm
-        run: |
-          helm repo add eks https://aws.github.io/eks-charts
-          helm repo update
-          helm upgrade --install aws-ebs-csi-driver eks/aws-ebs-csi-driver \
-            --namespace kube-system \
-            --set image.repository=602401143452.dkr.ecr.us-west-2.amazonaws.com/eks/aws-ebs-csi-driver
-          
-          # Wait until all pods are ready
-          kubectl wait --namespace kube-system \
-            --for=condition=Ready pods \
-            --selector app.kubernetes.io/name=aws-ebs-csi-driver \
-            --timeout=600s
+  #     - name: Run result service tests
+  #       run: ./tests.sh
+  #       working-directory: ./result/tests
 
   docker:
-    needs: [helm]
+    # needs: [terraform]
     runs-on: ubuntu-latest
     environment: dev
     strategy:
@@ -105,10 +95,8 @@ jobs:
 
       - name: Build and Push ${{ matrix.service }}
         run: |
-          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}
-          TAG=${{ github.sha }}
-          docker build -t $IMAGE:$TAG ./${{ matrix.service }}
-          docker push $IMAGE:$TAG
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest ./${{ matrix.service }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -121,18 +109,20 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.SARAH_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.SARAH_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.SARAH_AWS_REGION }}
 
       - name: Update kubeconfig
-        run: aws eks update-kubeconfig --name voting-app-3030 --region ${{ secrets.AWS_REGION }}
+        run: aws eks update-kubeconfig --name voting-app-sarah-1 --region ${{ secrets.SARAH_AWS_REGION }}
 
       - name: Deploy Kubernetes Manifests
-        run: kubectl apply -f k8s/.
+        run: |
+          kubectl apply -f k8s/.
 
-      - name: Verify Deployments Rollout
-        run: kubectl rollout status deployment --all -n default
+      - name: Verify all pods are running
+        run: |
+          kubectl get pods
 
-      - name: Get Service Details
+      - name: Get service details
         run: kubectl get svc -n default
