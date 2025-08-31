@@ -38,6 +38,18 @@ resource "aws_iam_role_policy_attachment" "ebs_csi_driver_attach" {
   role       = aws_iam_role.ebs_csi_driver.name
 }
 
+# Wait for node group to be ready before creating addon
+resource "null_resource" "wait_for_nodes" {
+  depends_on = [aws_eks_node_group.this]
+
+  provisioner "local-exec" {
+    command = <<EOT
+      echo "Waiting for EKS nodes to be Ready..."
+      kubectl wait --for=condition=Ready nodes --all --timeout=15m
+    EOT
+  }
+}
+
 # Install the EBS CSI driver as an addon
 resource "aws_eks_addon" "ebs_csi_driver" {
   cluster_name             = local.cluster_name
@@ -46,6 +58,7 @@ resource "aws_eks_addon" "ebs_csi_driver" {
   service_account_role_arn = aws_iam_role.ebs_csi_driver.arn
 
   depends_on = [
-    aws_iam_role_policy_attachment.ebs_csi_driver_attach
+    aws_iam_role_policy_attachment.ebs_csi_driver_attach,
+    null_resource.wait_for_nodes
   ]
 }

@@ -8,6 +8,17 @@ provider "kubernetes" {
   }
 }
 
+resource "null_resource" "wait_for_nodes" {
+  depends_on = [aws_eks_node_group.this]
+
+  provisioner "local-exec" {
+    command = <<EOT
+      echo "Waiting for EKS nodes to be Ready..."
+      kubectl wait --for=condition=Ready nodes --all --timeout=15m
+    EOT
+  }
+}
+
 provider "helm" {
   alias = "alb"
   kubernetes = {
@@ -35,7 +46,9 @@ resource "helm_release" "aws_load_balancer_controller" {
     })
   ]
 
+  depends_on = [null_resource.wait_for_nodes, aws_iam_role_policy_attachment.aws_load_balancer_controller_attach]
 }
+
 resource "aws_iam_role" "aws_load_balancer_controller" {
   name = "aws-load-balancer-controller"
 

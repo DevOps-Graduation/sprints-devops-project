@@ -13,6 +13,18 @@ resource "aws_eks_node_group" "this" {
     instance_types = [var.instance_type]
 }
 
+resource "null_resource" "wait_for_nodes" {
+  depends_on = [module.eks]
+
+  provisioner "local-exec" {
+    command = <<EOT
+      aws eks update-kubeconfig --name ${module.eks.cluster_name} --region ${var.region}
+      kubectl wait --for=condition=Ready nodes --all --timeout=10m
+    EOT
+  }
+}
+
+
 resource "aws_iam_role" "eks_nodes" {
   name = "${var.cluster_name}-eks-node-role"
 
