@@ -44,8 +44,8 @@ provider "helm" {
 }
 module "monitoring" {
   source = "./modules/monitoring"
-  cluster_endpoint              = module.eks.cluster_endpoint
-  cluster_certificate_authority = module.eks.cluster_certificate_authority
+  # cluster_endpoint              = module.eks.cluster_endpoint
+  # cluster_certificate_authority = module.eks.cluster_certificate_authority
   cluster_name = module.eks.cluster_name
   depends_on   = [module.eks]
 
