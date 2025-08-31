@@ -64,7 +64,7 @@ jobs:
       - name: Wait for EKS cluster kubeconfig
         run: |
           for i in {1..10}; do
-            aws eks update-kubeconfig --name voting-app-3030 --region ${{ secrets.AWS_REGION }} && break || sleep 30
+            aws eks update-kubeconfig --name voting-app --region ${{ secrets.AWS_REGION }} && break || sleep 30
           done
 
   docker:
@@ -107,7 +107,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Update kubeconfig
-        run: aws eks update-kubeconfig --name voting-app-3030 --region ${{ secrets.AWS_REGION }}
+        run: aws eks update-kubeconfig --name voting-app --region ${{ secrets.AWS_REGION }}
 
       - name: Deploy AWS Load Balancer Controller
         run: |
@@ -115,7 +115,7 @@ jobs:
           helm repo update
           helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \
             -n kube-system \
-            --set clusterName=voting-app-3030 \
+            --set clusterName=voting-app \
             --set serviceAccount.create=true \
             --set region=${{ secrets.AWS_REGION }}
 
